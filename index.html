@@ -16,6 +16,7 @@ body{
   height:100vh;
 }
 
+/* CONTAINER */
 .container{
   width:360px;
   height:600px;
@@ -24,26 +25,52 @@ body{
   border-radius:20px;
   display:flex;
   flex-direction:column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
 }
 
+/* HEADER */
+.header{
+  padding:10px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.header img{
+  width:35px;
+  border-radius:50%;
+}
+
+/* CHAT */
 .chat{
   flex:1;
   padding:15px;
   overflow-y:auto;
 }
 
+/* MESSAGE */
 .msg{
   margin:10px 0;
   padding:10px;
   border-radius:10px;
   max-width:70%;
+  animation: fadeUp 0.3s ease;
 }
 
-.user{background:#3b82f6; margin-left:auto;}
-.bot{background:rgba(255,255,255,0.1);}
+.user{
+  background:#3b82f6;
+  margin-left:auto;
+}
 
+.bot{
+  background:rgba(255,255,255,0.1);
+}
+
+/* INPUT */
 .input{
   display:flex;
+  border-top:1px solid rgba(255,255,255,0.1);
 }
 
 .input input{
@@ -60,23 +87,16 @@ body{
   background:#10b981;
   border:none;
   color:white;
-}
-  .container {
-  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-}
-
-.input button {
+  cursor:pointer;
   transition:0.3s;
 }
 
-.input button:hover {
+.input button:hover{
   transform:scale(1.05);
   box-shadow:0 0 10px #10b981;
 }
-  .msg {
-  animation: fadeUp 0.3s ease;
-}
 
+/* ANIMATION */
 @keyframes fadeUp {
   from {opacity:0; transform:translateY(10px);}
   to {opacity:1; transform:translateY(0);}
@@ -85,31 +105,44 @@ body{
 </head>
 
 <body>
-  <div style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; gap:10px;">
-  <img src="assets/avatar.png" style="width:35px; border-radius:50%;">
-  <div>
-    <b>AI Workflow Assistant</b><br>
-    <small style="color:gray;">Online</small>
-  </div>
-  </div>
 
 <div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <img src="assets/avatar.png">
+    <div>
+      <b>AI Workflow Assistant</b><br>
+      <small style="color:gray;">Online</small>
+    </div>
+  </div>
+
+  <!-- CHAT -->
   <div class="chat" id="chat"></div>
 
+  <!-- INPUT -->
   <div class="input">
     <input id="text" placeholder="Type task...">
     <button onclick="send()">Send</button>
   </div>
+
 </div>
 
 <script>
-let tasks = [];
-  
+
+// ENTER KEY SUPPORT
+document.getElementById("text").addEventListener("keypress", function(e){
+  if(e.key === "Enter"){
+    send();
+  }
+});
+
+// SEND FUNCTION
 function send(){
   let input = document.getElementById("text");
   let value = input.value;
 
-  if(!value) return;
+  if(!value.trim()) return;
 
   addMsg(value,"user");
   input.value="";
@@ -120,26 +153,29 @@ function send(){
     method: "POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify({task:value})
+  })
+  .catch(()=>{
+    addMsg("⚠️ Failed to save task","bot");
   });
 
   setTimeout(()=>{
-  typing.remove();
+    typing.remove();
 
-  let reply = "Task saved to system ✅";
+    let reply = "Task saved to system ✅";
 
-  if(value.toLowerCase().includes("today")){
-    reply = "📅 Showing today's tasks soon...";
-  }
-  else if(value.toLowerCase().includes("done")){
-    reply = "✅ Task marked as completed (simulated)";
-  }
+    if(value.toLowerCase().includes("today")){
+      reply = "📅 Showing today's tasks soon...";
+    }
+    else if(value.toLowerCase().includes("done")){
+      reply = "✅ Task marked as completed (simulated)";
+    }
 
-  addMsg(reply,"bot");
+    addMsg(reply,"bot");
 
-},800);
+  },800);
 }
 
-
+// ADD MESSAGE
 function addMsg(text,type){
   let div=document.createElement("div");
   div.className="msg "+type;
@@ -152,6 +188,7 @@ function addMsg(text,type){
 
   return div;
 }
+
 </script>
 
 </body>

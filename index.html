@@ -87,10 +87,14 @@ function send(){
   addMsg(value,"user");
   input.value="";
 
-  tasks.push(value);
+  fetch("https://hook.eu1.make.com/665d37s54c5xuojtb8dtlijd8yqy5foy", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ task: value })
+  });
 
   setTimeout(()=>{
-    addMsg("Task saved ✅","bot");
+    addMsg("Task saved to system ✅","bot");
   },500);
 }
 

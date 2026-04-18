@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Workflow Assistant</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0f172a;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.container{
+  width:360px;
+  height:600px;
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(15px);
+  border-radius:20px;
+  display:flex;
+  flex-direction:column;
+}
+
+.chat{
+  flex:1;
+  padding:15px;
+  overflow-y:auto;
+}
+
+.msg{
+  margin:10px 0;
+  padding:10px;
+  border-radius:10px;
+  max-width:70%;
+}
+
+.user{background:#3b82f6; margin-left:auto;}
+.bot{background:rgba(255,255,255,0.1);}
+
+.input{
+  display:flex;
+}
+
+.input input{
+  flex:1;
+  padding:10px;
+  border:none;
+  outline:none;
+  background:transparent;
+  color:white;
+}
+
+.input button{
+  padding:10px;
+  background:#10b981;
+  border:none;
+  color:white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="chat" id="chat"></div>
+
+  <div class="input">
+    <input id="text" placeholder="Type task...">
+    <button onclick="send()">Send</button>
+  </div>
+</div>
+
+<script>
+let tasks = [];
+
+function send(){
+  let input = document.getElementById("text");
+  let value = input.value;
+
+  if(!value) return;
+
+  addMsg(value,"user");
+  input.value="";
+
+  tasks.push(value);
+
+  setTimeout(()=>{
+    addMsg("Task saved ✅","bot");
+  },500);
+}
+
+function addMsg(text,type){
+  let div=document.createElement("div");
+  div.className="msg "+type;
+  div.innerText=text;
+  document.getElementById("chat").appendChild(div);
+}
+</script>
+
+</body>
+</html>

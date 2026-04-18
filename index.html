@@ -61,10 +61,37 @@ body{
   border:none;
   color:white;
 }
+  .container {
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+
+.input button {
+  transition:0.3s;
+}
+
+.input button:hover {
+  transform:scale(1.05);
+  box-shadow:0 0 10px #10b981;
+}
+  .msg {
+  animation: fadeUp 0.3s ease;
+}
+
+@keyframes fadeUp {
+  from {opacity:0; transform:translateY(10px);}
+  to {opacity:1; transform:translateY(0);}
+}
 </style>
 </head>
 
 <body>
+  <div style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; gap:10px;">
+  <img src="assets/avatar.png" style="width:35px; border-radius:50%;">
+  <div>
+    <b>AI Workflow Assistant</b><br>
+    <small style="color:gray;">Online</small>
+  </div>
+  </div>
 
 <div class="container">
   <div class="chat" id="chat"></div>
@@ -77,7 +104,7 @@ body{
 
 <script>
 let tasks = [];
-
+  
 function send(){
   let input = document.getElementById("text");
   let value = input.value;
@@ -87,22 +114,43 @@ function send(){
   addMsg(value,"user");
   input.value="";
 
+  let typing = addMsg("Typing...", "bot");
+
   fetch("https://hook.eu1.make.com/665d37s54c5xuojtb8dtlijd8yqy5foy", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ task: value })
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({task:value})
   });
 
   setTimeout(()=>{
-    addMsg("Task saved to system ✅","bot");
-  },500);
+  typing.remove();
+
+  let reply = "Task saved to system ✅";
+
+  if(value.toLowerCase().includes("today")){
+    reply = "📅 Showing today's tasks soon...";
+  }
+  else if(value.toLowerCase().includes("done")){
+    reply = "✅ Task marked as completed (simulated)";
+  }
+
+  addMsg(reply,"bot");
+
+},800);
 }
+
 
 function addMsg(text,type){
   let div=document.createElement("div");
   div.className="msg "+type;
   div.innerText=text;
-  document.getElementById("chat").appendChild(div);
+
+  let chat = document.getElementById("chat");
+  chat.appendChild(div);
+
+  chat.scrollTop = chat.scrollHeight;
+
+  return div;
 }
 </script>
 

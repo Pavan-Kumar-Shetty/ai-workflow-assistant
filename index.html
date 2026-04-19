@@ -18,8 +18,8 @@ body{
 
 /* CONTAINER */
 .container{
-  width:360px;
-  height:600px;
+  width:380px;
+  height:650px;
   background:rgba(255,255,255,0.05);
   backdrop-filter:blur(15px);
   border-radius:20px;
@@ -42,6 +42,34 @@ body{
   border-radius:50%;
 }
 
+.header button{
+  margin-left:auto;
+  background:#3b82f6;
+  border:none;
+  color:white;
+  padding:6px 12px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+/* DASHBOARD */
+.dashboard{
+  display:flex;
+  justify-content:space-around;
+  padding:10px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+.card{
+  text-align:center;
+  font-size:12px;
+}
+
+.card b{
+  font-size:18px;
+  display:block;
+}
+
 /* CHAT */
 .chat{
   flex:1;
@@ -49,12 +77,11 @@ body{
   overflow-y:auto;
 }
 
-/* MESSAGE */
 .msg{
   margin:10px 0;
   padding:10px;
   border-radius:10px;
-  max-width:70%;
+  max-width:75%;
   animation: fadeUp 0.3s ease;
 }
 
@@ -87,13 +114,6 @@ body{
   background:#10b981;
   border:none;
   color:white;
-  cursor:pointer;
-  transition:0.3s;
-}
-
-.input button:hover{
-  transform:scale(1.05);
-  box-shadow:0 0 10px #10b981;
 }
 
 /* ANIMATION */
@@ -112,8 +132,25 @@ body{
   <div class="header">
     <img src="assets/avatar.png">
     <div>
-      <b>AI Workflow Assistant</b><br>
+      <b>AI Assistant</b><br>
       <small style="color:gray;">Online</small>
+    </div>
+    <button onclick="loadTasks()">View</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="dashboard">
+    <div class="card">
+      <b id="total">0</b>
+      Total
+    </div>
+    <div class="card">
+      <b id="today">0</b>
+      Today
+    </div>
+    <div class="card">
+      <b id="last">-</b>
+      Last Task
     </div>
   </div>
 
@@ -130,14 +167,14 @@ body{
 
 <script>
 
-// ENTER KEY SUPPORT
+// ENTER KEY
 document.getElementById("text").addEventListener("keypress", function(e){
   if(e.key === "Enter"){
     send();
   }
 });
 
-// SEND FUNCTION
+// SEND TASK
 function send(){
   let input = document.getElementById("text");
   let value = input.value;
@@ -153,26 +190,49 @@ function send(){
     method: "POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify({task:value})
-  })
-  .catch(()=>{
-    addMsg("⚠️ Failed to save task","bot");
   });
 
   setTimeout(()=>{
     typing.remove();
+    addMsg("Task saved ✅","bot");
+  },700);
+}
 
-    let reply = "Task saved to system ✅";
+// LOAD TASKS + DASHBOARD
+function loadTasks(){
 
-    if(value.toLowerCase().includes("today")){
-      reply = "📅 Showing today's tasks soon...";
+  addMsg("📊 Loading dashboard...", "bot");
+
+  fetch("https://hook.eu1.make.com/665d37s54c5xuojtb8dtlijd8yqy5foy")
+  .then(res => res.json())
+  .then(data => {
+
+    if(!data || data.length === 0){
+      addMsg("No tasks found","bot");
+      return;
     }
-    else if(value.toLowerCase().includes("done")){
-      reply = "✅ Task marked as completed (simulated)";
-    }
 
-    addMsg(reply,"bot");
+    // TOTAL
+    document.getElementById("total").innerText = data.length;
 
-  },800);
+    // TODAY COUNT
+    let today = new Date().toLocaleDateString("en-GB");
+    let todayCount = data.filter(d => d.Time.includes(today)).length;
+    document.getElementById("today").innerText = todayCount;
+
+    // LAST TASK
+    let lastTask = data[data.length-1];
+    document.getElementById("last").innerText = lastTask.Task;
+
+    // SHOW LAST 5 TASKS
+    data.slice(-5).forEach(row => {
+      addMsg("📝 " + row.Task + " (" + row.Time + ")", "bot");
+    });
+
+  })
+  .catch(()=>{
+    addMsg("⚠️ Failed to load data","bot");
+  });
 }
 
 // ADD MESSAGE

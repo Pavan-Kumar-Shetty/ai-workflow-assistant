@@ -187,15 +187,21 @@ function send(){
   let typing = addMsg("Typing...", "bot");
 
   fetch("https://hook.eu1.make.com/665d37s54c5xuojtb8dtlijd8yqy5foy", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({task:value})
-  });
-
-  setTimeout(()=>{
-    typing.remove();
-    addMsg("Task saved ✅","bot");
-  },700);
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    task: value.trim()
+  })
+})
+.then(res => res.text())
+.then(() => {
+  typing.remove();
+  addMsg("Task saved ✅","bot");
+})
+.catch(() => {
+  typing.remove();
+  addMsg("❌ Failed to save","bot");
+});
 }
 
 // LOAD TASKS + DASHBOARD

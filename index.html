@@ -187,33 +187,45 @@ function send(){
   let typing = addMsg("Typing...", "bot");
 
   fetch("https://hook.eu1.make.com/665d37s54c5xuojtb8dtlijd8yqy5foy", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    task: value.trim()
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ task: value.trim() })
   })
-})
-.then(res => res.text())
-.then(() => {
-  typing.remove();
-  addMsg("Task saved ✅","bot");
-})
-.catch(() => {
-  typing.remove();
-  addMsg("❌ Failed to save","bot");
-});
+  .then(res => res.text())
+  .then(() => {
+    typing.remove();
+    addMsg("Task saved ✅","bot");
+  })
+  .catch(() => {
+    typing.remove();
+    addMsg("❌ Failed to save","bot");
+  });
 }
 
-// LOAD TASKS + DASHBOARD
+// LOAD TASKS
 function loadTasks(){
 
   addMsg("📊 Loading dashboard...", "bot");
 
   fetch("https://hook.eu1.make.com/665d37s54c5xuojtb8dtlijd8yqy5foy")
-  .then(res => res.json())
-  .then(data => {
+  .then(res => res.text()) // safer
+  .then(text => {
+    let data;
 
-    if(!data || data.length === 0){
+    try {
+      data = JSON.parse(text);
+    } catch {
+      addMsg("⚠️ Invalid response from server","bot");
+      return;
+    }
+
+    // ensure array
+    if(!Array.isArray(data)){
+      addMsg("⚠️ Data format incorrect","bot");
+      return;
+    }
+
+    if(data.length === 0){
       addMsg("No tasks found","bot");
       return;
     }
@@ -223,16 +235,22 @@ function loadTasks(){
 
     // TODAY COUNT
     let today = new Date().toLocaleDateString("en-GB");
-    let todayCount = data.filter(d => d.Time.includes(today)).length;
+
+    let todayCount = data.filter(d => 
+      d.Time && d.Time.includes(today)
+    ).length;
+
     document.getElementById("today").innerText = todayCount;
 
     // LAST TASK
     let lastTask = data[data.length-1];
-    document.getElementById("last").innerText = lastTask.Task;
+    document.getElementById("last").innerText = lastTask?.Task || "-";
 
     // SHOW LAST 5 TASKS
     data.slice(-5).forEach(row => {
-      addMsg("📝 " + row.Task + " (" + row.Time + ")", "bot");
+      let task = row.Task || "No task";
+      let time = row.Time || "";
+      addMsg("📝 " + task + " (" + time + ")", "bot");
     });
 
   })
